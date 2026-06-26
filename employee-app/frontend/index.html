@@ -3,87 +3,216 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Employee Directory</title>
+    <title>Employee Directory | Landmark</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; padding: 20px; }
-        h1 { text-align: center; margin-bottom: 20px; color: #333; }
-        .container { max-width: 1000px; margin: 0 auto; }
+        body { font-family: 'Inter', sans-serif; background: #f0f2f5; min-height: 100vh; }
 
-        /* Form */
-        .form-card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .form-card h2 { margin-bottom: 15px; color: #555; }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .form-grid input, .form-grid select { padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
-        .form-grid input[type="file"] { grid-column: span 2; }
-        .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; margin-top: 10px; }
-        .btn-primary { background: #0066cc; color: #fff; }
-        .btn-danger { background: #dc3545; color: #fff; }
-        .btn-sm { padding: 6px 12px; font-size: 12px; margin: 2px; }
-        .btn:hover { opacity: 0.9; }
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            padding: 20px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+        .header .logo { display: flex; align-items: center; gap: 12px; }
+        .header .logo svg { width: 32px; height: 32px; }
+        .header .logo h1 { font-size: 20px; font-weight: 600; }
+        .header .env-badge { background: rgba(255,255,255,0.1); padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* Stats banner */
-        .stats-bar { background: #0066cc; color: #fff; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-around; text-align: center; }
-        .stat-item h3 { font-size: 24px; margin-bottom: 4px; }
-        .stat-item p { font-size: 12px; opacity: 0.8; }
-        .toast { position: fixed; top: 20px; right: 20px; background: #28a745; color: #fff; padding: 12px 20px; border-radius: 6px; display: none; z-index: 999; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .layout { display: flex; max-width: 1400px; margin: 0 auto; padding: 30px; gap: 30px; }
+        .sidebar { width: 400px; flex-shrink: 0; }
+        .main { flex: 1; }
 
-        /* Employee cards */
-        .employees-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
-        .emp-card { background: #fff; border-radius: 8px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; gap: 15px; align-items: center; }
-        .emp-card img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; background: #ddd; }
-        .emp-info h3 { font-size: 16px; color: #333; }
-        .emp-info p { font-size: 13px; color: #666; margin-top: 2px; }
-        .emp-actions { margin-left: auto; }
+        .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); text-align: center; transition: transform 0.2s, box-shadow 0.2s; }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+        .stat-card h3 { font-size: 28px; font-weight: 700; color: #1a1a2e; }
+        .stat-card p { font-size: 12px; color: #888; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .form-card { background: #fff; padding: 28px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); position: sticky; top: 30px; }
+        .form-card h2 { font-size: 18px; font-weight: 600; color: #1a1a2e; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .form-group { margin-bottom: 14px; }
+        .form-group.full { grid-column: span 2; }
+        .form-group label { display: block; font-size: 12px; font-weight: 500; color: #666; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background: #fff;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+        .form-group select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 36px;
+        }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79,70,229,0.1); }
+        .form-group input[type="file"] { padding: 10px; background: #f8fafc; cursor: pointer; }
+        .form-group input[type="date"] { cursor: pointer; }
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+        .btn-primary { background: #4f46e5; color: #fff; width: 100%; margin-top: 6px; }
+        .btn-primary:hover { background: #4338ca; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79,70,229,0.3); }
+        .btn-danger { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+        .btn-danger:hover { background: #dc2626; color: #fff; }
+        .btn-sm { padding: 8px 14px; font-size: 12px; }
+
+        .section-title { font-size: 16px; font-weight: 600; color: #1a1a2e; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+        .section-title span { font-size: 12px; color: #888; font-weight: 400; }
+        .search-bar { margin-bottom: 20px; }
+        .search-bar input { width: 100%; padding: 12px 16px 12px 40px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; font-family: 'Inter', sans-serif; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") no-repeat 14px center; transition: border-color 0.2s; }
+        .search-bar input:focus { outline: none; border-color: #4f46e5; }
+
+        .employees-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+        .emp-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); display: flex; gap: 16px; align-items: center; transition: transform 0.2s, box-shadow 0.2s; border: 1px solid transparent; }
+        .emp-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); border-color: #e2e8f0; }
+        .emp-avatar { width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 18px; flex-shrink: 0; overflow: hidden; }
+        .emp-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .emp-info { flex: 1; min-width: 0; }
+        .emp-info h3 { font-size: 15px; font-weight: 600; color: #1a1a2e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .emp-info .emp-role { font-size: 13px; color: #4f46e5; font-weight: 500; margin-top: 2px; }
+        .emp-info .emp-meta { font-size: 12px; color: #888; margin-top: 4px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .emp-dept { display: inline-block; padding: 2px 8px; background: #f0f2f5; border-radius: 4px; font-size: 11px; color: #555; font-weight: 500; }
+        .emp-age { font-size: 11px; color: #999; }
+
+        .toast { position: fixed; top: 24px; right: 24px; background: #1a1a2e; color: #fff; padding: 14px 24px; border-radius: 10px; display: none; z-index: 999; box-shadow: 0 10px 40px rgba(0,0,0,0.2); font-size: 14px; font-weight: 500; animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        .empty-state { text-align: center; padding: 60px 20px; color: #888; grid-column: 1 / -1; }
+        .empty-state svg { width: 64px; height: 64px; margin-bottom: 16px; opacity: 0.4; }
+        .empty-state h3 { font-size: 16px; color: #555; margin-bottom: 8px; }
+        .empty-state p { font-size: 13px; }
+
+        @media (max-width: 900px) {
+            .layout { flex-direction: column; padding: 20px; }
+            .sidebar { width: 100%; }
+            .form-row { grid-template-columns: 1fr; }
+            .form-group.full { grid-column: span 1; }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Employee Directory</h1>
+    <div class="header">
+        <div class="logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <h1>Employee Directory</h1>
+        </div>
+        <div class="env-badge">Landmark Inc.</div>
+    </div>
 
-        <!-- Stats Banner -->
-        <div class="stats-bar" id="stats-bar">
-            <div class="stat-item"><h3 id="stat-total">0</h3><p>Total Employees</p></div>
-            <div class="stat-item"><h3 id="stat-departments">0</h3><p>Departments</p></div>
-            <div class="stat-item"><h3 id="stat-latest">-</h3><p>Latest Hire</p></div>
+    <div class="toast" id="toast"></div>
+
+    <div class="layout">
+        <div class="sidebar">
+            <div class="form-card">
+                <h2>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                    <span id="form-title">Add Employee</span>
+                </h2>
+                <form id="employee-form">
+                    <input type="hidden" id="edit-id">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="name" placeholder="Jane Smith" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="email" placeholder="jane@landmark.dev" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Department</label>
+                            <select id="department" required>
+                                <option value="" disabled selected>Select department</option>
+                                <option value="Engineering">Engineering</option>
+                                <option value="Product">Product</option>
+                                <option value="Design">Design</option>
+                                <option value="Marketing">Marketing</option>
+                                <option value="Sales">Sales</option>
+                                <option value="Finance">Finance</option>
+                                <option value="Human Resources">Human Resources</option>
+                                <option value="Operations">Operations</option>
+                                <option value="DevOps">DevOps</option>
+                                <option value="QA">QA</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Role</label>
+                            <select id="role" required>
+                                <option value="" disabled selected>Select role</option>
+                                <option value="Intern">Intern</option>
+                                <option value="Junior">Junior</option>
+                                <option value="Mid-Level">Mid-Level</option>
+                                <option value="Senior">Senior</option>
+                                <option value="Lead">Lead</option>
+                                <option value="Manager">Manager</option>
+                                <option value="Director">Director</option>
+                                <option value="VP">VP</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Date of Birth</label>
+                            <input type="date" id="dob" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Profile Photo</label>
+                            <input type="file" id="photo" accept="image/*">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Employee</button>
+                </form>
+            </div>
         </div>
 
-        <!-- Toast notification -->
-        <div class="toast" id="toast"></div>
+        <div class="main">
+            <div class="stats-row">
+                <div class="stat-card"><h3 id="stat-total">0</h3><p>Employees</p></div>
+                <div class="stat-card"><h3 id="stat-departments">0</h3><p>Departments</p></div>
+                <div class="stat-card"><h3 id="stat-latest">-</h3><p>Latest Hire</p></div>
+            </div>
 
-        <!-- Add/Edit Form -->
-        <div class="form-card">
-            <h2 id="form-title">Add Employee</h2>
-            <form id="employee-form">
-                <input type="hidden" id="edit-id">
-                <div class="form-grid">
-                    <input type="text" id="name" placeholder="Full Name" required>
-                    <input type="email" id="email" placeholder="Email" required>
-                    <input type="text" id="role" placeholder="Role" required>
-                    <input type="text" id="department" placeholder="Department" required>
-                    <input type="file" id="photo" accept="image/*">
-                </div>
-                <button type="submit" class="btn btn-primary">Save Employee</button>
-            </form>
+            <div class="search-bar">
+                <input type="text" id="search" placeholder="Search employees by name, role, or department...">
+            </div>
+
+            <div class="section-title">Team Members <span id="employee-count"></span></div>
+            <div class="employees-grid" id="employees-list"></div>
         </div>
-
-        <!-- Employee List -->
-        <div class="employees-grid" id="employees-list"></div>
     </div>
 
     <script>
         const API_URL = window.location.origin + "/api";
+        let allEmployees = [];
 
-        // Load stats
-        async function loadStats() {
-            const res = await fetch(`${API_URL}/stats`);
-            const stats = await res.json();
-            document.getElementById("stat-total").textContent = stats.total_employees;
-            document.getElementById("stat-departments").textContent = Object.keys(stats.departments).length;
-            document.getElementById("stat-latest").textContent = stats.latest_hire ? stats.latest_hire.name : "-";
+        const avatarColors = ["#4f46e5","#7c3aed","#db2777","#dc2626","#ea580c","#ca8a04","#16a34a","#0891b2","#2563eb","#9333ea"];
+
+        function getInitials(name) {
+            return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
         }
 
-        // Show toast notification
+        function getColor(name) {
+            let hash = 0;
+            for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            return avatarColors[Math.abs(hash) % avatarColors.length];
+        }
+
+        function calculateAge(dob) {
+            if (!dob) return "";
+            const diff = Date.now() - new Date(dob).getTime();
+            const age = Math.floor(diff / (365.25 * 24 * 60 * 60 * 1000));
+            return `${age}y`;
+        }
+
         function showToast(message) {
             const toast = document.getElementById("toast");
             toast.textContent = message;
@@ -91,27 +220,69 @@
             setTimeout(() => { toast.style.display = "none"; }, 3000);
         }
 
-        // Load employees on page load
-        async function loadEmployees() {
-            const res = await fetch(`${API_URL}/employees`);
-            const employees = await res.json();
+        async function loadStats() {
+            try {
+                const res = await fetch(`${API_URL}/stats`);
+                const stats = await res.json();
+                document.getElementById("stat-total").textContent = stats.total_employees;
+                document.getElementById("stat-departments").textContent = Object.keys(stats.departments).length;
+                document.getElementById("stat-latest").textContent = stats.latest_hire ? stats.latest_hire.name.split(" ")[0] : "-";
+            } catch (e) {}
+        }
+
+        function renderEmployees(employees) {
             const grid = document.getElementById("employees-list");
+            const count = document.getElementById("employee-count");
+            count.textContent = employees.length > 0 ? `(${employees.length})` : "";
+
+            if (employees.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        <h3>No employees found</h3>
+                        <p>Add your first team member using the form.</p>
+                    </div>`;
+                return;
+            }
+
             grid.innerHTML = employees.map(emp => `
                 <div class="emp-card">
-                    <img src="${emp.photo_url || 'https://via.placeholder.com/60'}" alt="${emp.name}">
+                    <div class="emp-avatar" style="background: ${emp.photo_url ? 'transparent' : getColor(emp.name)}">
+                        ${emp.photo_url ? `<img src="${emp.photo_url}" alt="${emp.name}">` : getInitials(emp.name)}
+                    </div>
                     <div class="emp-info">
                         <h3>${emp.name}</h3>
-                        <p>${emp.role}</p>
-                        <p>${emp.department} &bull; ${emp.email}</p>
+                        <div class="emp-role">${emp.role}</div>
+                        <div class="emp-meta">
+                            <span class="emp-dept">${emp.department}</span>
+                            ${emp.dob ? `<span class="emp-age">${calculateAge(emp.dob)}</span>` : ""}
+                            ${emp.email}
+                        </div>
                     </div>
-                    <div class="emp-actions">
-                        <button class="btn btn-danger btn-sm" onclick="deleteEmployee(${emp.id})">Delete</button>
-                    </div>
+                    <button class="btn btn-danger btn-sm" onclick="deleteEmployee(${emp.id})">Remove</button>
                 </div>
             `).join("");
         }
 
-        // Submit form (create)
+        async function loadEmployees() {
+            const res = await fetch(`${API_URL}/employees`);
+            allEmployees = await res.json();
+            renderEmployees(allEmployees);
+        }
+
+        // Search filter
+        document.getElementById("search").addEventListener("input", (e) => {
+            const q = e.target.value.toLowerCase();
+            const filtered = allEmployees.filter(emp =>
+                emp.name.toLowerCase().includes(q) ||
+                emp.role.toLowerCase().includes(q) ||
+                emp.department.toLowerCase().includes(q) ||
+                emp.email.toLowerCase().includes(q)
+            );
+            renderEmployees(filtered);
+        });
+
+        // Form submit
         document.getElementById("employee-form").addEventListener("submit", async (e) => {
             e.preventDefault();
             const formData = new FormData();
@@ -119,6 +290,7 @@
             formData.append("email", document.getElementById("email").value);
             formData.append("role", document.getElementById("role").value);
             formData.append("department", document.getElementById("department").value);
+            formData.append("dob", document.getElementById("dob").value);
 
             const photo = document.getElementById("photo").files[0];
             if (photo) formData.append("photo", photo);
@@ -127,20 +299,25 @@
             const url = editId ? `${API_URL}/employees/${editId}` : `${API_URL}/employees`;
             const method = editId ? "PUT" : "POST";
 
-            await fetch(url, { method, body: formData });
+            const res = await fetch(url, { method, body: formData });
+            if (res.ok) {
+                showToast(editId ? "✓ Employee updated" : "✓ Employee added successfully");
+            } else {
+                const err = await res.json();
+                showToast("✗ " + (err.error || "Something went wrong"));
+            }
+
             document.getElementById("employee-form").reset();
             document.getElementById("edit-id").value = "";
             document.getElementById("form-title").textContent = "Add Employee";
-            showToast(editId ? "Employee updated successfully!" : "Employee added successfully!");
             loadEmployees();
             loadStats();
         });
 
-        // Delete employee
         async function deleteEmployee(id) {
-            if (confirm("Delete this employee?")) {
+            if (confirm("Remove this employee from the directory?")) {
                 await fetch(`${API_URL}/employees/${id}`, { method: "DELETE" });
-                showToast("Employee deleted.");
+                showToast("✓ Employee removed");
                 loadEmployees();
                 loadStats();
             }

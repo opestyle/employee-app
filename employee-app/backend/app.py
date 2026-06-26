@@ -63,6 +63,7 @@ class Employee(db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     role = db.Column(db.String(100), nullable=False)
     department = db.Column(db.String(100), nullable=False)
+    dob = db.Column(db.String(10))
     photo_url = db.Column(db.String(500))
 
     def to_dict(self):
@@ -72,6 +73,7 @@ class Employee(db.Model):
             "email": self.email,
             "role": self.role,
             "department": self.department,
+            "dob": self.dob,
             "photo_url": self.photo_url,
         }
 
@@ -168,6 +170,7 @@ def create_employee():
         email=data["email"],
         role=data["role"],
         department=data["department"],
+        dob=data.get("dob"),
         photo_url=photo_url,
     )
     db.session.add(employee)
@@ -185,6 +188,7 @@ def update_employee(id):
     employee.email = data.get("email", employee.email)
     employee.role = data.get("role", employee.role)
     employee.department = data.get("department", employee.department)
+    employee.dob = data.get("dob", employee.dob)
 
     if "photo" in request.files and request.files["photo"].filename:
         employee.photo_url = upload_photo(request.files["photo"])
