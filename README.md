@@ -1,210 +1,92 @@
-# Terraform Tutorial - Beginner to Advanced
+# Employee App
 
-## Beginner
+A web application for managing employee records. The backend is a Python Flask API that stores employee data in RDS PostgreSQL and profile photos in S3. The frontend is a simple HTML/JS UI served by Nginx. The app runs on EKS with secrets pulled from AWS Secrets Manager via External Secrets Operator, and is exposed through an ALB Ingress with HTTPS.
 
-### 1. Introduction to Terraform
-- What is Infrastructure as Code (IaC)
-- Terraform vs other IaC tools (CloudFormation, Pulumi, Ansible)
-- Terraform architecture and how it works
-- Providers, resources, and state
+## Deployment Steps
 
-### 2. Installation & Setup
-- Installing Terraform (Windows, macOS, Linux)
-- Configuring AWS CLI and credentials
-- IDE setup (VS Code + Terraform extension)
-
-### 3. Your First Terraform Configuration
-- Writing a basic `.tf` file
-- `terraform init`, `plan`, `apply`, `destroy`
-- Understanding the execution workflow
-- Resource arguments and attributes
-
-### 4. Providers
-- What are providers
-- Configuring AWS provider
-- Multiple provider configurations
-- Provider versioning and constraints
-
-### 5. Variables
-- Input variables (`variable` block)
-- Variable types (string, number, bool, list, map, object)
-- Default values
-- Variable validation rules
-- `terraform.tfvars` and `.auto.tfvars`
-- Environment variables (`TF_VAR_`)
-
-### 6. Outputs
-- Output values
-- Referencing outputs from other modules
-- Sensitive outputs
-
-### 7. State Management Basics
-- What is Terraform state
-- Local state vs remote state
-- `terraform.tfstate` file
-- `terraform show` and `terraform state list`
-
----
-
-## Intermediate
-
-### 8. Remote State & Backends
-- S3 + DynamoDB backend configuration
-- State locking and consistency
-- `terraform force-unlock`
-- State file encryption
-
-### 9. Tfvars & Environments
-- Structuring environments (dev, stg, prod)
-- Using `-var-file` flag
-- Environment-specific configurations
-- Workspace vs directory-based environments
-
-### 10. Data Sources
-- Querying existing infrastructure
-- `data` blocks
-- Using data sources with resources (AMIs, VPCs, subnets)
-
-### 11. Resource Dependencies
-- Implicit dependencies (resource references)
-- Explicit dependencies (`depends_on`)
-- Resource graph and execution order
-
-### 12. Provisioners
-- `local-exec` and `remote-exec`
-- `file` provisioner
-- When to use (and avoid) provisioners
-- `null_resource` and triggers
-
-### 13. Terraform Modules
-- What are modules
-- Creating reusable modules
-- Module inputs and outputs
-- Local vs remote modules (Terraform Registry, Git, S3)
-- Module versioning
-
-### 14. Expressions & Functions
-- String interpolation and templates
-- Conditional expressions (`condition ? true : false`)
-- Built-in functions (`lookup`, `merge`, `concat`, `file`, `templatefile`)
-- `for` expressions
-- Splat expressions (`[*]`)
-
-### 15. Loops & Dynamic Blocks
-- `count` meta-argument
-- `for_each` meta-argument
-- `dynamic` blocks
-- When to use `count` vs `for_each`
-
----
-
-## Advanced
-
-### 16. Workspaces
-- Terraform workspaces overview
-- Creating and switching workspaces
-- Workspace-based environment management
-- `terraform.workspace` variable
-
-### 17. State Management Advanced
-- `terraform import` (importing existing resources)
-- `terraform state mv`, `rm`, `pull`, `push`
-- State file migration between backends
-- Handling state drift
-
-### 18. Terraform Cloud & Enterprise
-- Remote execution
-- Sentinel policies
-- Cost estimation
-- VCS integration
-- Team access and governance
-
-### 19. CI/CD with Terraform
-- Terraform in GitHub Actions
-- Terraform in GitLab CI
-- Terraform in Jenkins
-- Automated plan and apply workflows
-- Pull request automation (Atlantis)
-
-### 20. Advanced Module Patterns
-- Module composition
-- Nested modules
-- Module testing
-- Publishing modules to Terraform Registry
-
-### 21. Custom Providers
-- When to build a custom provider
-- Provider SDK (Terraform Plugin Framework)
-- CRUD operations in providers
-
-### 22. Security Best Practices
-- Managing secrets (Vault, AWS Secrets Manager, SSM Parameter Store)
-- Least privilege IAM policies for Terraform
-- State file security and encryption
-- Sensitive variables and outputs
-- `.gitignore` for Terraform projects
-
-### 23. Testing Terraform Code
-- `terraform validate`
-- `terraform fmt`
-- `tflint` (linting)
-- `checkov` and `tfsec` (security scanning)
-- Terratest (integration testing with Go)
-- `terraform plan` as a test
-
-### 24. Performance & Scaling
-- Targeting specific resources (`-target`)
-- Parallelism (`-parallelism`)
-- Splitting large configurations
-- Managing large state files
-- Refresh and plan optimization
-
-### 25. Advanced Patterns
-- Zero-downtime deployments with Terraform
-- Blue/Green and Canary deployments
-- Terraform with Kubernetes
-- Terraform with Docker
-- Multi-cloud infrastructure
-- Terragrunt for DRY configurations
-
----
-
-## Project Ideas
-
-| Level | Project |
-|-------|---------|
-| Beginner | Deploy a single EC2 instance with security group |
-| Beginner | Create an S3 bucket with versioning and lifecycle rules |
-| Intermediate | VPC with public/private subnets, NAT gateway, and ALB |
-| Intermediate | Multi-environment setup using tfvars and modules |
-| Advanced | Full EKS cluster with node groups and IAM roles |
-| Advanced | Multi-region disaster recovery setup |
-| Advanced | CI/CD pipeline deploying Terraform with state locking |
-
----
-
-## Useful Commands Reference
+### 1. Deploy Infrastructure
 
 ```bash
-terraform init          # Initialize working directory
-terraform plan          # Preview changes
-terraform apply         # Apply changes
-terraform destroy       # Destroy infrastructure
-terraform fmt           # Format code
-terraform validate      # Validate configuration
-terraform output        # Show outputs
-terraform state list    # List resources in state
-terraform import        # Import existing resource
-terraform workspace     # Manage workspaces
-terraform force-unlock  # Release stuck state lock
+cd terraform
+terraform init
+terraform apply -var-file=env/dev/terraform.tfvars
 ```
 
----
+### 2. Get Terraform Outputs
 
-## Recommended Resources
+```bash
+terraform output s3_access_role_arn
+terraform output acm_certificate_arn
+terraform output app_bucket_name
+terraform output secrets_manager_secret_arn
+```
 
-- [Terraform Documentation](https://developer.hashicorp.com/terraform/docs)
-- [Terraform Registry](https://registry.terraform.io/)
-- [AWS Provider Docs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
-- [Terraform Best Practices](https://www.terraform-best-practices.com/)
-- [Terraform Up & Running (Book)](https://www.terraformupandrunning.com/)
+Or use AWS CLI:
+
+```bash
+# serviceAccount.roleArn
+aws iam get-role --role-name landmark-cluster-dev-app-sa --query "Role.Arn" --output text --profile terraform
+
+# ingress.certificateArn
+aws acm list-certificates --region us-east-1 --query "CertificateSummaryList[?DomainName=='employees.landmark.dev'].CertificateArn" --output text --profile terraform
+
+# s3.bucket
+aws s3api list-buckets --query "Buckets[?starts_with(Name,'landmark-app-bucket')].Name" --output text --profile terraform
+
+# externalSecrets.secretName
+aws secretsmanager list-secrets --region us-east-1 --query "SecretList[?starts_with(Name,'landmark-cluster')].Name" --output text --profile terraform
+```
+
+Copy the values and update `helm/values.yaml`:
+- `s3_access_role_arn` → `serviceAccount.roleArn`
+- `acm_certificate_arn` → `ingress.certificateArn`
+- `app_bucket_name` → `s3.bucket`
+- `secrets_manager_secret_arn` → verify `externalSecrets.secretName` matches
+
+### 3. Build and Push Docker Images
+
+```bash
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 075120018043.dkr.ecr.us-east-1.amazonaws.com
+
+cd employee-app/backend
+docker build -t 075120018043.dkr.ecr.us-east-1.amazonaws.com/employee-backend:latest .
+docker push 075120018043.dkr.ecr.us-east-1.amazonaws.com/employee-backend:latest
+
+cd ../frontend
+docker build -t 075120018043.dkr.ecr.us-east-1.amazonaws.com/employee-frontend:latest .
+docker push 075120018043.dkr.ecr.us-east-1.amazonaws.com/employee-frontend:latest
+```
+
+### 4. Connect to EKS
+
+```bash
+aws eks update-kubeconfig --name landmark-cluster-dev --region us-east-1 --profile terraform
+```
+
+### 5. Install External Secrets Operator
+
+```bash
+helm repo add external-secrets https://charts.external-secrets.io
+helm install external-secrets external-secrets/external-secrets -n external-secrets --create-namespace
+```
+
+### 6. Deploy the App
+
+```bash
+helm install employee-app helm/ --namespace employee-app --create-namespace
+```
+
+### 7. Verify
+
+```bash
+kubectl get pods -n employee-app
+kubectl get ingress -n employee-app
+```
+
+## Run Tests
+
+```bash
+cd employee-app/backend
+pip install -r requirements.txt
+pytest
+```

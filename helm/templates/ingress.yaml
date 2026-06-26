@@ -5,11 +5,9 @@ metadata:
   name: employee-app
   namespace: {{ .Release.Namespace }}
   annotations:
-    # Use AWS ALB Ingress Controller
     kubernetes.io/ingress.class: {{ .Values.ingress.ingressClass }}
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
-    # ACM certificate for HTTPS
     alb.ingress.kubernetes.io/certificate-arn: {{ .Values.ingress.certificateArn }}
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
     alb.ingress.kubernetes.io/ssl-redirect: "443"
@@ -20,7 +18,6 @@ spec:
     - host: {{ .Values.ingress.host }}
       http:
         paths:
-          # Route /api/* to backend
           - path: /api
             pathType: Prefix
             backend:
@@ -28,7 +25,6 @@ spec:
                 name: backend
                 port:
                   number: {{ .Values.backend.port }}
-          # Route everything else to frontend
           - path: /
             pathType: Prefix
             backend:
