@@ -101,6 +101,24 @@ module "lb_controller_irsa" {
   }
 }
 
+# Additional LB controller permissions for newer versions
+resource "aws_iam_role_policy" "lb_controller_extra" {
+  name = "${var.cluster_name}-${var.environment}-lb-extra"
+  role = module.lb_controller_irsa.iam_role_name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = [
+        "elasticloadbalancing:DescribeListenerAttributes",
+        "elasticloadbalancing:ModifyListenerAttributes"
+      ]
+      Resource = "*"
+    }]
+  })
+}
+
 # S3 bucket for application use
 resource "aws_s3_bucket" "app" {
   bucket = "${var.app_bucket_name}-${var.environment}"
