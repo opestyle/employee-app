@@ -7,4 +7,13 @@ resource "aws_cloudwatch_log_group" "app" {
     Name        = "employee-app-logs"
     Environment = var.environment
   }
+
+  lifecycle {
+    ignore_changes = [name]
+  }
+}
+
+import {
+  to = aws_cloudwatch_log_group.app
+  id = "/landmark/employee-app"
 }

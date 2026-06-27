@@ -1,7 +1,7 @@
 region              = "us-east-1"
 environment         = "prod"
 cluster_name        = "landmark-cluster"
-kubernetes_version  = "1.29"
+kubernetes_version  = "1.32"
 
 # VPC
 vpc_cidr             = "10.2.0.0/16"
