@@ -44,14 +44,18 @@ jobs:
     needs: [test]
     environment: ${{ github.event.inputs.environment || 'development' }}
     outputs:
-      image_tag: ${{ steps.tag.outputs.tag }}
+      backend_tag: ${{ steps.tag.outputs.backend_tag }}
+      frontend_tag: ${{ steps.tag.outputs.frontend_tag }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set image tag
         id: tag
-        run: echo "tag=${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
+        run: |
+          TIMESTAMP=$(date +'%Y%m%d-%H%M%S')
+          echo "backend_tag=be-${{ github.event.inputs.environment || 'dev' }}-${TIMESTAMP}" >> $GITHUB_OUTPUT
+          echo "frontend_tag=fe-${{ github.event.inputs.environment || 'dev' }}-${TIMESTAMP}" >> $GITHUB_OUTPUT
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -65,13 +69,13 @@ jobs:
 
       - name: Build and push backend
         run: |
-          docker build -t ${{ vars.ECR_REGISTRY }}/employee-backend:${{ steps.tag.outputs.tag }} employee-app/backend/
-          docker push ${{ vars.ECR_REGISTRY }}/employee-backend:${{ steps.tag.outputs.tag }}
+          docker build -t ${{ vars.ECR_REGISTRY }}/employee-backend:${{ steps.tag.outputs.backend_tag }} employee-app/backend/
+          docker push ${{ vars.ECR_REGISTRY }}/employee-backend:${{ steps.tag.outputs.backend_tag }}
 
       - name: Build and push frontend
         run: |
-          docker build -t ${{ vars.ECR_REGISTRY }}/employee-frontend:${{ steps.tag.outputs.tag }} employee-app/frontend/
-          docker push ${{ vars.ECR_REGISTRY }}/employee-frontend:${{ steps.tag.outputs.tag }}
+          docker build -t ${{ vars.ECR_REGISTRY }}/employee-frontend:${{ steps.tag.outputs.frontend_tag }} employee-app/frontend/
+          docker push ${{ vars.ECR_REGISTRY }}/employee-frontend:${{ steps.tag.outputs.frontend_tag }}
 
   deploy:
     runs-on: ubuntu-latest
@@ -91,17 +95,17 @@ jobs:
       - name: Update kubeconfig
         run: aws eks update-kubeconfig --name ${{ vars.EKS_CLUSTER }} --region ${{ vars.AWS_REGION }}
 
-      - name: Update image tag in values.yaml
+      - name: Update image tags in values.yaml
         run: |
-          TAG=${{ needs.build-and-push.outputs.image_tag }}
-          sed -i "s/tag: .*/tag: $TAG/" helm/values.yaml
+          sed -i "0,/tag: .*/s/tag: .*/tag: ${{ needs.build-and-push.outputs.backend_tag }}/" helm/values.yaml
+          sed -i "0,/tag: ${{ needs.build-and-push.outputs.backend_tag }}/!s/tag: .*/tag: ${{ needs.build-and-push.outputs.frontend_tag }}/" helm/values.yaml
 
-      - name: Commit updated tag back to repo
+      - name: Commit updated tags back to repo
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add helm/values.yaml
-          git commit -m "ci: update image tag to ${{ needs.build-and-push.outputs.image_tag }}" || true
+          git commit -m "ci: update tags - backend:${{ needs.build-and-push.outputs.backend_tag }} frontend:${{ needs.build-and-push.outputs.frontend_tag }}" || true
           git push
 
       - name: Install/Upgrade Helm release
