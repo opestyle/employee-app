@@ -2,7 +2,72 @@
   "title": "Application Logs - CloudWatch",
   "uid": "cloudwatch-logs",
   "panels": [
-    {"title":"Application Logs","type":"logs","gridPos":{"h":20,"w":24,"x":0,"y":0},"datasource":{"type":"cloudwatch","uid":"cloudwatch"},"targets":[{"queryMode":"Logs","logGroups":[{"arn":"arn:aws:logs:us-east-1:075120018043:log-group:/landmark/employee-app","name":"/landmark/employee-app"}],"expression":"fields @timestamp, @message | sort @timestamp desc | limit 100"}]}
+    {
+      "title": "Request Rate (per minute)",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+      "datasource": {"type": "cloudwatch", "uid": "cloudwatch"},
+      "targets": [{
+        "queryMode": "Logs",
+        "logGroups": [{"arn": "arn:aws:logs:us-east-1:075120018043:log-group:/landmark/employee-app", "name": "/landmark/employee-app"}],
+        "expression": "filter @message like /GET|POST|PUT|DELETE/\n| stats count(*) as requests by bin(1m)"
+      }]
+    },
+    {
+      "title": "Avg Response Time (ms)",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+      "datasource": {"type": "cloudwatch", "uid": "cloudwatch"},
+      "targets": [{
+        "queryMode": "Logs",
+        "logGroups": [{"arn": "arn:aws:logs:us-east-1:075120018043:log-group:/landmark/employee-app", "name": "/landmark/employee-app"}],
+        "expression": "filter @message like /ms$/\n| parse @message '* - *ms' as status_part, duration\n| stats avg(duration) as avg_ms, max(duration) as max_ms by bin(1m)"
+      }]
+    },
+    {
+      "title": "Requests by HTTP Method",
+      "type": "piechart",
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 8},
+      "datasource": {"type": "cloudwatch", "uid": "cloudwatch"},
+      "targets": [{
+        "queryMode": "Logs",
+        "logGroups": [{"arn": "arn:aws:logs:us-east-1:075120018043:log-group:/landmark/employee-app", "name": "/landmark/employee-app"}],
+        "expression": "filter @message like /GET|POST|PUT|DELETE/\n| parse @message '* /*' as method, path\n| stats count(*) as total by method"
+      }]
+    },
+    {
+      "title": "Requests by Endpoint",
+      "type": "barchart",
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 8},
+      "datasource": {"type": "cloudwatch", "uid": "cloudwatch"},
+      "targets": [{
+        "queryMode": "Logs",
+        "logGroups": [{"arn": "arn:aws:logs:us-east-1:075120018043:log-group:/landmark/employee-app", "name": "/landmark/employee-app"}],
+        "expression": "filter @message like /GET|POST|PUT|DELETE/\n| parse @message '* * -' as method, endpoint\n| stats count(*) as total by endpoint\n| sort total desc\n| limit 10"
+      }]
+    },
+    {
+      "title": "Error Rate (4xx/5xx)",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 8},
+      "datasource": {"type": "cloudwatch", "uid": "cloudwatch"},
+      "targets": [{
+        "queryMode": "Logs",
+        "logGroups": [{"arn": "arn:aws:logs:us-east-1:075120018043:log-group:/landmark/employee-app", "name": "/landmark/employee-app"}],
+        "expression": "filter @message like /- (4|5)\\d{2} -/\n| stats count(*) as errors by bin(1m)"
+      }]
+    },
+    {
+      "title": "Slowest Requests (>100ms)",
+      "type": "table",
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 16},
+      "datasource": {"type": "cloudwatch", "uid": "cloudwatch"},
+      "targets": [{
+        "queryMode": "Logs",
+        "logGroups": [{"arn": "arn:aws:logs:us-east-1:075120018043:log-group:/landmark/employee-app", "name": "/landmark/employee-app"}],
+        "expression": "filter @message like /ms$/\n| parse @message '* * - * - *ms' as method, endpoint, status, duration\n| filter duration > 100\n| sort duration desc\n| limit 20\n| display @timestamp, method, endpoint, status, duration"
+      }]
+    }
   ],
   "schemaVersion": 38,
   "time": {"from": "now-1h", "to": "now"},
