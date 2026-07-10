@@ -1,0 +1,16 @@
+{
+  "title": "Platform Metrics",
+  "uid": "platform-metrics",
+  "panels": [
+    {"title":"Node CPU Usage","type":"timeseries","gridPos":{"h":8,"w":12,"x":0,"y":0},"datasource":{"type":"prometheus","uid":"prometheus"},"targets":[{"expr":"100 - (avg by(instance)(rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)","legendFormat":"{{instance}}"}]},
+    {"title":"Node Memory Usage","type":"timeseries","gridPos":{"h":8,"w":12,"x":12,"y":0},"datasource":{"type":"prometheus","uid":"prometheus"},"targets":[{"expr":"(1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100","legendFormat":"{{instance}}"}]},
+    {"title":"Pod Count by Namespace","type":"stat","gridPos":{"h":6,"w":12,"x":0,"y":8},"datasource":{"type":"prometheus","uid":"prometheus"},"targets":[{"expr":"count(kube_pod_info) by (namespace)","legendFormat":"{{namespace}}"}]},
+    {"title":"Pod Restarts","type":"timeseries","gridPos":{"h":6,"w":12,"x":12,"y":8},"datasource":{"type":"prometheus","uid":"prometheus"},"targets":[{"expr":"sum(kube_pod_container_status_restarts_total) by (namespace, pod)","legendFormat":"{{namespace}}/{{pod}}"}]},
+    {"title":"CPU by Pod (employee-app)","type":"timeseries","gridPos":{"h":8,"w":12,"x":0,"y":14},"datasource":{"type":"prometheus","uid":"prometheus"},"targets":[{"expr":"sum(rate(container_cpu_usage_seconds_total{namespace=\"employee-app\"}[5m])) by (pod)","legendFormat":"{{pod}}"}]},
+    {"title":"Memory by Pod (employee-app)","type":"timeseries","gridPos":{"h":8,"w":12,"x":12,"y":14},"datasource":{"type":"prometheus","uid":"prometheus"},"targets":[{"expr":"sum(container_memory_working_set_bytes{namespace=\"employee-app\"}) by (pod) / 1024 / 1024","legendFormat":"{{pod}} (MB)"}]},
+    {"title":"Deployment Replicas","type":"table","gridPos":{"h":6,"w":24,"x":0,"y":22},"datasource":{"type":"prometheus","uid":"prometheus"},"targets":[{"expr":"kube_deployment_status_replicas{namespace=\"employee-app\"}","format":"table","instant":true}]}
+  ],
+  "schemaVersion": 38,
+  "time": {"from": "now-1h", "to": "now"},
+  "refresh": "30s"
+}

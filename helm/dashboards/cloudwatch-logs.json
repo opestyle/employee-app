@@ -1,0 +1,10 @@
+{
+  "title": "Application Logs - CloudWatch",
+  "uid": "cloudwatch-logs",
+  "panels": [
+    {"title":"Application Logs","type":"logs","gridPos":{"h":20,"w":24,"x":0,"y":0},"datasource":{"type":"cloudwatch","uid":"cloudwatch"},"targets":[{"queryMode":"Logs","logGroups":[{"arn":"","name":"/landmark/employee-app"}],"expression":"fields @timestamp, @message | sort @timestamp desc | limit 100"}]}
+  ],
+  "schemaVersion": 38,
+  "time": {"from": "now-1h", "to": "now"},
+  "refresh": "30s"
+}
