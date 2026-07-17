@@ -1,46 +1,38 @@
 # Backend configuration
 backend:
   image: 063718566254.dkr.ecr.us-east-1.amazonaws.com/employee-backend
-  tag: latest
+  tag: be-dev-20260717-180137
   replicas: 2
   port: 5000
-
 # Frontend configuration
 frontend:
   image: 063718566254.dkr.ecr.us-east-1.amazonaws.com/employee-frontend
-  tag: latest
+  tag: fe-dev-20260717-180137
   replicas: 2
   port: 80
-
 # Service Account for S3 + Secrets Manager access
 serviceAccount:
   name: app-sa
   roleArn: "arn:aws:iam::063718566254:role/landmark-cluster-dev-app-sa"
-
 # External Secrets - AWS Secrets Manager
 externalSecrets:
   secretName: "landmark-cluster-dev/employee-app"
   refreshInterval: "1m"
-
 # Ingress via ALB
 ingress:
   enabled: true
   ingressClass: alb
-
 # S3 bucket
 s3:
   bucket: "landmark-app-bucket-dev"
   region: "us-east-1"
-
 # CloudWatch Logging
 logging:
   logGroup: "/landmark/employee-app"
   environment: "dev"
-
 # Monitoring - kube-prometheus-stack
 monitoring:
   enabled: true
-
 kube-prometheus-stack:
   alertmanager:
     enabled: false
