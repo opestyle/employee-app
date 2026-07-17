@@ -1,21 +1,21 @@
 # Backend configuration
 backend:
-  image: 075120018043.dkr.ecr.us-east-1.amazonaws.com/employee-backend
-  tag: be-dev-20260710-013631
+  image: 063718566254.dkr.ecr.us-east-1.amazonaws.com/employee-backend
+  tag: latest
   replicas: 2
   port: 5000
 
 # Frontend configuration
 frontend:
-  image: 075120018043.dkr.ecr.us-east-1.amazonaws.com/employee-frontend
-  tag: fe-dev-20260710-013631
+  image: 063718566254.dkr.ecr.us-east-1.amazonaws.com/employee-frontend
+  tag: latest
   replicas: 2
   port: 80
 
 # Service Account for S3 + Secrets Manager access
 serviceAccount:
   name: app-sa
-  roleArn: "arn:aws:iam::075120018043:role/landmark-cluster-dev-app-sa"
+  roleArn: "arn:aws:iam::063718566254:role/landmark-cluster-dev-app-sa"
 
 # External Secrets - AWS Secrets Manager
 externalSecrets:
@@ -70,7 +70,7 @@ kube-prometheus-stack:
               name: /landmark/employee-app
     serviceAccount:
       annotations:
-        eks.amazonaws.com/role-arn: "arn:aws:iam::075120018043:role/landmark-cluster-dev-app-sa"
+        eks.amazonaws.com/role-arn: "arn:aws:iam::063718566254:role/landmark-cluster-dev-app-sa"
   prometheus:
     prometheusSpec:
       serviceMonitorSelectorNilUsesHelmValues: false
