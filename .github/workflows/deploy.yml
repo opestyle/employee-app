@@ -110,6 +110,16 @@ jobs:
           git commit -m "ci: update tags - backend:${{ needs.build-and-push.outputs.backend_tag }} frontend:${{ needs.build-and-push.outputs.frontend_tag }}" || true
           git push
 
+      - name: Install External Secrets Operator
+        run: |
+          helm repo add external-secrets https://charts.external-secrets.io
+          helm repo update
+          helm upgrade --install external-secrets external-secrets/external-secrets \
+            --namespace external-secrets \
+            --create-namespace \
+            --wait \
+            --timeout 3m
+
       - name: Install/Upgrade Helm release
         run: |
           helm upgrade --install employee-app helm/ \
