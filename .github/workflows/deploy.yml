@@ -15,6 +15,10 @@ on:
           - staging
           - production
 
+permissions:
+  id-token: write
+  contents: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -60,8 +64,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
 
       - name: Login to ECR
@@ -88,8 +91,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
 
       - name: Update kubeconfig
@@ -97,20 +99,20 @@ jobs:
 
       - name: Update image tags in values.yaml
         run: |
-          sed -i "0,/tag: .*/s/tag: .*/tag: ${{ needs.build-and-push.outputs.backend_tag }}/" helm/values.yaml
-          sed -i "0,/tag: ${{ needs.build-and-push.outputs.backend_tag }}/!s/tag: .*/tag: ${{ needs.build-and-push.outputs.frontend_tag }}/" helm/values.yaml
+          yq e '.backend.image.tag = "${{ needs.build-and-push.outputs.backend_tag }}"' -i employee-app/helm/values.yaml
+          yq e '.frontend.image.tag = "${{ needs.build-and-push.outputs.frontend_tag }}"' -i employee-app/helm/values.yaml
 
       - name: Commit updated tags back to repo
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add helm/values.yaml
+          git add employee-app/helm/values.yaml
           git commit -m "ci: update tags - backend:${{ needs.build-and-push.outputs.backend_tag }} frontend:${{ needs.build-and-push.outputs.frontend_tag }}" || true
           git push
 
       - name: Install/Upgrade Helm release
         run: |
-          helm upgrade --install employee-app helm/ \
+          helm upgrade --install employee-app employee-app/helm/ \
             --namespace ${{ vars.NAMESPACE }} \
             --create-namespace \
             --wait \

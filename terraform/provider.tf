@@ -3,11 +3,11 @@ terraform {
   required_version = ">= 1.5.0"
 
   backend "s3" {
-    bucket       = "landmark-terraform-state-file"
-    key          = "eks/terraform.tfstate"
-    region       = "us-east-1"
-    profile      = "terraform"
-    use_lockfile = true
+    bucket         = "landmark-terraform-state-file"
+    key            = "eks/terraform.tfstate"
+    region         = "us-east-1"
+    encrypt        = true
+    dynamodb_table = "landmark-terraform-locks"
   }
 
   required_providers {
@@ -20,6 +20,5 @@ terraform {
 
 # AWS provider
 provider "aws" {
-  region  = var.region
-  profile = "terraform"
+  region = var.region
 }

@@ -18,8 +18,12 @@ node_max_size       = 10
 # S3
 app_bucket_name = "landmark-app-bucket"
 
+# GitHub OIDC
+github_org  = "<your-github-org>"
+github_repo = "<your-repo-name>"
+
 # RDS
 db_name           = "employees"
 db_username       = "landmark_admin"
-db_password       = "ChangeMe123!"
+# db_password is injected at runtime via TF_VAR_db_password env var
 db_instance_class = "db.t3.medium"
