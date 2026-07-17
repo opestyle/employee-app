@@ -1,13 +1,3 @@
-variable "github_org" {
-  description = "GitHub organization or username"
-  type        = string
-}
-
-variable "github_repo" {
-  description = "GitHub repository name"
-  type        = string
-}
-
 # GitHub OIDC provider (one per AWS account, safe to have multiple declarations)
 resource "aws_iam_openid_connect_provider" "github" {
   url = "https://token.actions.githubusercontent.com"
@@ -118,8 +108,8 @@ resource "aws_iam_role_policy" "github_actions_tfstate" {
           "s3:HeadObject"
         ]
         Resource = [
-          "arn:aws:s3:::landmark-terraform-state-file",
-          "arn:aws:s3:::landmark-terraform-state-file/*"
+          "arn:aws:s3:::landmark-terraform-state-063718566254",
+          "arn:aws:s3:::landmark-terraform-state-063718566254/*"
         ]
       },
       {

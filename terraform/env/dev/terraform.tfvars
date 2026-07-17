@@ -19,8 +19,8 @@ node_max_size       = 3
 app_bucket_name = "landmark-app-bucket"
 
 # GitHub OIDC
-github_org  = "<your-github-org>"
-github_repo = "<your-repo-name>"
+github_org  = "opestyle"
+github_repo = "employee-app"
 
 # RDS
 db_name           = "employees"
